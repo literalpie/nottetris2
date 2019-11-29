@@ -1,4 +1,5 @@
 function love.load()
+
 	--requires--
 	require "controls"
 	require "gameB"
@@ -24,7 +25,7 @@ function love.load()
 
 	if fullscreen == false then
 		if scale ~= 5 then
-			love.window.setMode( 160*scale, 144*scale, {fullscreen=false, vsync=vsync})
+			love.window.setMode( 160*5, 144*5, {fullscreen=false, vsync=vsync})
 		end
 	else
 		love.window.setMode( 0, 0, {fullscreen=true, vsync=vsync})
@@ -529,7 +530,7 @@ function loadconfig()
 end
 
 function loadoptions()
-	if love.filesystem.exists("options.txt") then
+	if love.filesystem.getInfo("options.txt") then
 		local s = love.filesystem.read("options.txt")
 		local split1 = s:split("\n")
 		for i = 1, #split1 do
@@ -635,7 +636,7 @@ function loadhighscores()
 		fileloc = "highscoresB.txt"
 	end
 
-	if love.filesystem.exists( fileloc ) then
+	if love.filesystem.getInfo( fileloc ) then
 
 		highdata = love.filesystem.read( fileloc )
 		highdata = highdata:split(";")
@@ -1094,7 +1095,7 @@ function love.keypressed( key, unicode )
 				love.audio.play(pausesound)
 			else
 				if musicno < 4 then
-					love.audio.resume(music[musicno])
+					love.audio.play(music[musicno])
 				end
 			end
 		end

@@ -342,23 +342,23 @@ function gameA_update(dt)
 
 	if gamestate == "gameA" then
 		if controls.isDown("rotateright") then
-			if tetribodies[1]:getAngularVelocity() < 3 then
-				tetribodies[1]:applyTorque( 70 )
+			if tetribodies[1]:getAngularVelocity() < 1.5 then
+				tetribodies[1]:applyTorque( 8000 )
 			end
 		end
 		if controls.isDown("rotateleft") then
-			if tetribodies[1]:getAngularVelocity() > -3 then
-				tetribodies[1]:applyTorque( -70 )
+			if tetribodies[1]:getAngularVelocity() > -1.5 then
+				tetribodies[1]:applyTorque( -8000 )
 			end
 		end
 
 		if controls.isDown( "left" ) then
 			local x, y = tetribodies[1]:getWorldCenter()
-			tetribodies[1]:applyForce( -70, 0, x, y )
+			tetribodies[1]:applyForce( -600, 0, x, y )
 		end
 		if controls.isDown( "right" ) then
 			local x, y = tetribodies[1]:getWorldCenter()
-			tetribodies[1]:applyForce( 70, 0, x, y )
+			tetribodies[1]:applyForce( 600, 0, x, y )
 		end
 
 		local x, y = tetribodies[1]:getLinearVelocity( )
@@ -410,8 +410,10 @@ function gameA_update(dt)
 end
 
 function getintersectX(shape, y) --returns left and right collision points to a certain shape on a Y coordinate (or -1, -0.9 if no collision)
-	local lefttime = shape:testSegment( 55, y, 385, y)
-	local righttime = shape:testSegment( 385, y, 55, y)
+	-- local lefttime = shape:testSegment( 55, y, 385, y)
+	-- local righttime = shape:testSegment( 385, y, 55, y)
+	local lefttime = 0.5
+	local righttime = 0.5
 	if lefttime ~= nil and righttime ~= nil then
 		local leftx = 330 * lefttime + 55
 		local rightx = 385 - 330 * righttime
@@ -840,7 +842,7 @@ function checklinedensity(active) --checks all 18 lines and, if active == true, 
 
 	for i = 2, #tetribodies do
 		for j, k in pairs(tetrishapes[i]) do
-			local coords = getPoints2table(k)
+			local coords = getPoints2table(k:getShape())
 			--Get first and last involved line
 			local firstline = 19
 			local lastline =  0
@@ -855,13 +857,13 @@ function checklinedensity(active) --checks all 18 lines and, if active == true, 
 
 			for line = firstline, lastline do
 				if line >= 1 and line <= 18 then
-					coords = getPoints2table(k)
+					coords = getPoints2table(k:getShape())
 
 					if line > firstline then
 						local offset = 0
 
 						repeat
-							leftx, rightx = getintersectX(tetrishapes[i][j], (line-1)*32+offset)
+							leftx, rightx = getintersectX(tetrishapes[i][j]:getShape(), (line-1)*32+offset)
 							offset = offset + 1
 						until leftx ~= -1 or offset >= 32
 
@@ -1178,14 +1180,29 @@ function samepos(coords, y, x) --checks if any point in a table is identical to 
 	return false
 end
 
+function printTable(o)
+	if type(o) == 'table' then
+		 local s = '{ '
+		 for k,v in pairs(o) do
+				if type(k) ~= 'number' then k = '"'..k..'"' end
+				s = s .. '['..k..'] = ' .. printTable(v) .. ','
+		 end
+		 return s .. '} '
+	else
+		 return tostring(o)
+	end
+end
+
 function collideA(a, b, coll) --box2d callback. calls endblock.
+	-- print("collide a")
 	--Sometimes a is nil or something I have no idea why.
 	if a == nil or b == nil then
 		return
 	end
-
-	if a[1] == 1 or b[1] == 1 then
-		if a[1] ~= "left" and a[1] ~= "right" and b[1] ~= "left" and b[1] ~= "right" then
+	local aData = a.getUserData(a)[1]
+	local bData = b.getUserData(b)[1]
+	if aData == 1 or bData == 1 then
+		if aData ~= "left" and aData ~= "right" and aData ~= "left" and bData ~= "right" then
 			if gamestate == "gameA" then
 				if tetribodies[1]:getY() < losingY then
 					gamestate = "failingA"
